@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.boge.system.dao.UserDao">
+    <resultMap id="UserResultMap" type="com.boge.system.entity.User">
+        <result column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="alias" property="alias"/>
+        <result column="locked" property="locked"/>
+    </resultMap>
+    <resultMap id="RoleResultMap" type="com.boge.system.entity.Role">
+        <result column="id" property="id"/>
+        <result column="role" property="role"/>
+        <result column="description" property="description"/>
+        <result column="available" property="available"/>
+    </resultMap>
+    <resultMap id="MenusResultMap" type="com.boge.system.entity.Menu">
+        <result column="id" property="id"/>
+        <result column="permission" property="permission"/>
+        <result column="description" property="description"/>
+        <result column="available" property="available"/>
+    </resultMap>
+
+    <select id="findAllUsers" resultMap="UserResultMap">
+        SELECT
+            id,
+            username,
+            alias,
+            locked
+        FROM sys_users
+    </select>
+
+    <select id="findByUsername" resultType="com.boge.system.entity.User" parameterType="java.lang.String">
+        SELECT
+            id,
+            username,
+            password,
+            alias,
+            salt,
+            locked
+        FROM sys_users
+        WHERE username = #{username}
+    </select>
+
+    <select id="findHavingRoles" resultMap="RoleResultMap" parameterType="java.lang.String">
+        SELECT
+            r.id,
+            r.role,
+            r.description,
+            r.available
+        FROM sys_users u, sys_roles r, sys_users_roles ur
+        WHERE u.username = #{username} AND u.id = ur.user_id AND r.id = ur.role_id
+    </select>
+
+    <select id="findUserMenus" resultMap="MenusResultMap" parameterType="java.lang.String">
+        SELECT
+            m.id,
+            m.permission,
+            m.description,
+            m.available
+        FROM sys_users u, sys_roles r, sys_menus m, sys_users_roles ur, sys_roles_menus rp
+        WHERE u.username = #{username} AND u.id = ur.user_id AND r.id = ur.role_id AND r.id = rp.role_id AND m.id = rp.permission_id
+    </select>
+</mapper>

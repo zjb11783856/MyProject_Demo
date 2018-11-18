@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.boge.system.dao.MenuDao">
+    <resultMap id="PermissionMap" type="com.boge.system.entity.Menu">
+        <result property="id" column="id"/>
+        <result property="pid" column="pid"/>
+        <result property="permission" column="permission"/>
+        <result property="title" column="title"/>
+        <result property="icon" column="icon"/>
+        <result property="href" column="href"/>
+        <result property="available" column="available"/>
+        <result property="seqNo" column="seqNo"/>
+        <collection property="children" select="findPermissions" column="{pid = id,username = username}"/>
+    </resultMap>
+
+    <select id="findPermissions" resultMap="PermissionMap" parameterType="java.util.Map">
+        SELECT
+        m.id AS "id",
+        m.pid AS "pid",
+        m.permission AS "permission",
+        m.title AS "title",
+        m.icon AS "icon",
+        m.href AS "href",
+        #{username} AS "username"
+        FROM
+        sys_menus m
+        LEFT JOIN sys_roles_menus rm ON m.id = rm.menu_id
+        LEFT JOIN sys_roles r ON rm.role_id = r.id
+        LEFT JOIN sys_users_roles sur ON r.id = sur.role_id
+        LEFT JOIN sys_users u ON sur.user_id = u.id
+        WHERE
+        u.username = #{username} AND m.available = 1
+        <choose>
+            <when test="pid != null and pid != ''">
+                AND m.pid = #{pid}
+            </when>
+            <otherwise>
+                and m.pid IS NULL
+            </otherwise>
+        </choose>
+        ORDER BY m.seqNo ASC
+    </select>
+
+    <resultMap id="ShowMenuMap" type="com.boge.system.entity.ShowMenu">
+        <result property="id" column="id"/>
+        <result property="pid" column="pid"/>
+        <result property="title" column="title"/>
+        <result property="icon" column="icon"/>
+        <result property="href" column="href"/>
+        <collection property="children" select="findUserMenus" column="{pid = id,username = username}"/>
+    </resultMap>
+
+    <select id="findUserMenus" resultMap="ShowMenuMap" parameterType="java.util.Map">
+        SELECT
+        m.id AS "id",
+        m.pid AS "pid",
+        m.title AS "title",
+        m.icon AS "icon",
+        m.href AS "href",
+        #{username} AS "username"
+        FROM
+        sys_menus m
+        LEFT JOIN sys_roles_menus rm ON m.id = rm.menu_id
+        LEFT JOIN sys_roles r ON rm.role_id = r.id
+        LEFT JOIN sys_users_roles sur ON r.id = sur.role_id
+        LEFT JOIN sys_users u ON sur.user_id = u.id
+        WHERE
+        u.username = #{username} AND m.available = 1
+        <choose>
+            <when test="pid != null and pid != ''">
+                AND m.pid = #{pid}
+            </when>
+            <otherwise>
+                and m.pid IS NULL
+            </otherwise>
+        </choose>
+        ORDER BY m.seqNo ASC
+    </select>
+
+    <resultMap id="MenuMap" type="com.boge.system.entity.Menu">
+        <result property="id" column="id"/>
+        <result property="pid" column="pid"/>
+        <result property="permission" column="permission"/>
+        <result property="title" column="title"/>
+        <result property="icon" column="icon"/>
+        <result property="href" column="href"/>
+        <result property="available" column="available"/>
+        <result property="seqNo" column="seqNo"/>
+        <collection property="children" select="findMenus" column="{pid = id}"/>
+    </resultMap>
+
+    <select id="findMenus" resultMap="MenuMap" parameterType="java.util.Map">
+        SELECT
+        m.id AS "id",
+        m.pid AS "pid",
+        m.permission AS "permission",
+        m.title AS "title",
+        m.icon AS "icon",
+        m.href AS "href",
+        m.available AS "available",
+        m.seqNo AS "seqNo"
+        FROM sys_menus m
+        WHERE 1=1
+        <choose>
+            <when test="pid != null and pid != ''">
+                AND m.pid = #{pid}
+            </when>
+            <otherwise>
+                and m.pid IS NULL
+            </otherwise>
+        </choose>
+        ORDER BY m.seqNo ASC
+    </select>
+</mapper>
