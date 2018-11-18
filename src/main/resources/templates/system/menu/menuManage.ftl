@@ -9,7 +9,6 @@
     <meta name="keywords" content="">
     <link href="" rel="stylesheet">
     <link rel="stylesheet" href="${base}/static/layui/css/layui.css" media="all"/>
-    <link rel="stylesheet" href="${base}/static/layui/css/grid.css"/>
     <style>
         .layui-table .value_col {
             text-align: center;
@@ -20,193 +19,93 @@
 <fieldset class="layui-elem-field">
     <legend>菜单管理</legend>
     <div class="layui-field-box">
-        <div class="layui-inline">
-            <a class="layui-btn layui-btn-normal" data-type="addUser">添加根菜单</a>
-        </div>
     </div>
 </fieldset>
 <div class="layui-form users_list">
-    <div id="demo"></div>
+    <div id="menuTab"></div>
 </div>
 </body>
 <script type="text/javascript" src="${base}/static/layui/layui.js"></script>
-<script type="text/javascript" src="${base}/static/layui/treeGrid.js"></script>
-<script type="text/javascript" src="${base}/static/layui/grid.js"></script>
 <script type="text/javascript" src="${base}/static/js/jquery.min.js"></script>
 <script type="text/javascript">
-    layui.use(['tree', 'layer', 'table'], function () {
-        var layer = layui.layer,
-                $ = layui.jquery;
-
-        var layout = [
-            {name: '菜单名称', treeNodes: true, headerClass: 'value_col'},
-            {
-                name: '链接地址',
-                headerClass: 'value_col',
-                colClass: 'value_col',
-                style: 'width: 15%',
-                render: function (row) {
-                    return undefined === row.href ? "" : row.href;
-                }
-            },
-            {
-                name: '图标',
-                headerClass: 'value_col',
-                colClass: 'value_col',
-                style: 'width: 5%;text-align: center;',
-                render: function (row) {
-                    return undefined === row.icon ? "" : '<i class="layui-icon" style="font-size: 30px;">' + row.icon + '</i>';
-                }
-            },
-            {
-                name: '排序',
-                headerClass: 'value_col',
-                colClass: 'value_col',
-                style: 'width: 5%;text-align: center;',
-                render: function (row) {
-                    return undefined === row.sort ? "" : row.sort;
-                }
-            },
-            {
-                name: '创建时间',
-                headerClass: 'value_col',
-                colClass: 'value_col',
-                style: 'width: 10%',
-                render: function (row) {
-                    return undefined === row.createDate ? "" : new Date(row.createDate).Format("yyyy-MM-dd hh:mm:ss");
-                }
-            },
-            {
-                name: '操作',
-                headerClass: 'value_col',
-                colClass: 'value_col',
-                style: 'width: 30%;text-align: center;',
-                render: function (row) {
-                    return '<a class="layui-btn layui-btn-normal layui-btn-sm" onclick="addChildMenu(' + row.id + ')"><i class="layui-icon">&#xe654;</i> 添加子菜单</a>' +
-                            '<a class="layui-btn layui-btn-normal layui-btn-sm" onclick="editChildMenu(' + row.id + ')"><i class="layui-icon">&#xe642;</i> 编辑菜单</a>' +
-                            '<a class="layui-btn layui-btn-danger layui-btn-sm" onclick="delMenu(' + row.id + ')"><i class="layui-icon">&#xe640;</i> 删除</a>';
-                }
-            }
-        ];
-
-        var setTree = function (data, layout) {
-            $("#demo").empty();
-            layui.treeGird({
-                elem: '#demo', //传入元素选择器
-                nodes: data,
-                layout: layout
-            });
-        };
-
-        $(function () {
-            $.post("${base}/system/menu/menuList", function (res) {
-                if (res.success) {
-                    setTree(res.data, layout);
-                } else {
-                    layer.msg(res.message);
-                }
-            });
-        });
-
-        var active = {
-            addUser: function () {
-                var addIndex = layer.open({
-                    title: "添加系统菜单",
-                    type: 2,
-                    content: "${base}/admin/system/menu/add",
-                    success: function (layero, addIndex) {
-                        setTimeout(function () {
-                            layer.tips('点击此处返回角色列表', '.layui-layer-setwin .layui-layer-close', {
-                                tips: 3
-                            });
-                        }, 500);
+    var baseUrl = "${base}";
+    var editObj = null, ptable = null, treeGrid = null, tableId = 'menuTab', layer = null;
+    layui.config({
+        base: baseUrl + '/static/layui/extend/'
+    }).extend({
+        treeGrid: 'treeGrid'
+    }).use(['jquery', 'treeGrid', 'layer'], function () {
+        var $ = layui.jquery;
+        treeGrid = layui.treeGrid;//很重要
+        layer = layui.layer;
+        ptable = treeGrid.render({
+            id: tableId,
+            elem: '#' + tableId,
+            idField: 'id',
+            url: "${base}/system/menu/menuList",
+            cellMinWidth: 100,
+            treeId: 'id',//树形id字段名称
+            treeUpId: 'pid',//树形父id字段名称
+            treeShowName: 'title',//以树形式显示的字段
+            cols: [[
+                {
+                    width: 100, title: '操作', align: 'center'/*toolbar: '#barDemo'*/
+                    , templet: function (d) {
+                        var html = '';
+                        var addBtn = '<a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="add">添加</a>';
+                        var delBtn = '<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>';
+                        return addBtn + delBtn;
                     }
-                });
-                //改变窗口大小时，重置弹窗的高度，防止超出可视区域（如F12调出debug的操作）
-                $(window).resize(function () {
-                    layer.full(addIndex);
-                });
-                layer.full(addIndex);
-            }
-        };
-
-        $('.layui-inline .layui-btn').on('click', function () {
-            var type = $(this).data('type');
-            active[type] ? active[type].call(this) : '';
+                },
+                {field: 'title', edit: 'text', width: 300, title: '菜单名称'},
+                {field: 'id', width: 100, title: 'id'},
+                {field: 'pid', title: 'pid'},
+                {field: 'permission', title: '权限'},
+                {field: 'href', title: '链接'},
+                {
+                    field: 'icon', title: '图标', templet: function (row) {
+                        return null === row.icon ? "" : '<i class="' + row.icon + '" style="font-size: 30px;"></i>';
+                    }
+                },
+                {
+                    title: '状态', templet: function (row) {
+                        return row.available === true ? "启用" : "禁用";
+                    }
+                },
+                {field: 'seqNo', title: '排序'}
+            ]],
+            page: false
         });
 
+        treeGrid.on('tool(' + tableId + ')', function (obj) {
+            if (obj.event === 'del') {//删除行
+                del(obj);
+            } else if (obj.event === "add") {//添加行
+                add(obj.data);
+            }
+        });
     });
 
-    var addChildMenu = function (data) {
-        var addIndex = layer.open({
-            title: "添加系统菜单",
-            type: 2,
-            content: "${base}/admin/system/menu/add?parentId=" + data,
-            success: function (layero, addIndex) {
-                setTimeout(function () {
-                    layer.tips('点击此处返回角色列表', '.layui-layer-setwin .layui-layer-close', {
-                        tips: 3
-                    });
-                }, 500);
-            }
-        });
-        //改变窗口大小时，重置弹窗的高度，防止超出可视区域（如F12调出debug的操作）
-        $(window).resize(function () {
-            layer.full(addIndex);
-        });
-        layer.full(addIndex);
-    };
-
-    var editChildMenu = function (data) {
-        var editIndex = layer.open({
-            title: "编辑菜单",
-            type: 2,
-            content: "${base}/admin/system/menu/edit?id=" + data,
-            success: function (layero, index) {
-                setTimeout(function () {
-                    layer.tips('点击此处返回会员列表', '.layui-layer-setwin .layui-layer-close', {
-                        tips: 3
-                    });
-                }, 500);
-            }
-        });
-        //改变窗口大小时，重置弹窗的高度，防止超出可视区域（如F12调出debug的操作）
-        $(window).resize(function () {
-            layer.full(editIndex);
-        });
-        layer.full(editIndex);
-    };
-    var delMenu = function (data) {
-        layer.confirm("你确定要删除该菜单么？这将会使得其下的所有子菜单都删除", {btn: ['是的,我确定', '我再想想']},
-                function () {
-                    $.post("${base}/admin/system/menu/delete", {"id": data}, function (res) {
-                        if (res.success) {
-                            layer.msg("删除成功", {time: 1000}, function () {
-                                location.reload();
-                            });
-                        } else {
-                            layer.msg(res.message);
-                        }
-                    });
+    function del(obj) {
+        layer.confirm("你确定删除数据吗？如果存在下级节点则一并删除，此操作不能撤销！", {icon: 3, title: '提示'},
+                function (index) {//确定回调
+                    obj.del();
+                    layer.close(index);
+                }, function (index) {//取消回调
+                    layer.close(index);
                 }
-        )
-    };
-    //格式化时间
-    Date.prototype.Format = function (fmt) {
-        var o = {
-            "M+": this.getMonth() + 1, //月份
-            "d+": this.getDate(), //日
-            "h+": this.getHours(), //小时
-            "m+": this.getMinutes(), //分
-            "s+": this.getSeconds(), //秒
-            "q+": Math.floor((this.getMonth() + 3) / 3), //季度
-            "S": this.getMilliseconds() //毫秒
-        };
-        if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
-        for (var k in o)
-            if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
-        return fmt;
-    };
-</script>
+        );
+    }
 
+    var i = 1000;
+
+    //添加
+    function add(pObj) {
+        var param = {};
+        param.name = '水果' + Math.random();
+        param.id = ++i;
+        param.pId = pObj ? pObj.id : 0;
+        treeGrid.addRow(tableId, pObj ? pObj.LAY_TABLE_INDEX + 1 : 0, param);
+    }
+</script>
 </html>

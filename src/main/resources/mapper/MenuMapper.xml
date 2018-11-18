@@ -86,7 +86,6 @@
         <result property="href" column="href"/>
         <result property="available" column="available"/>
         <result property="seqNo" column="seqNo"/>
-        <collection property="children" select="findMenus" column="{pid = id}"/>
     </resultMap>
 
     <select id="findMenus" resultMap="MenuMap" parameterType="java.util.Map">
@@ -100,15 +99,6 @@
         m.available AS "available",
         m.seqNo AS "seqNo"
         FROM sys_menus m
-        WHERE 1=1
-        <choose>
-            <when test="pid != null and pid != ''">
-                AND m.pid = #{pid}
-            </when>
-            <otherwise>
-                and m.pid IS NULL
-            </otherwise>
-        </choose>
         ORDER BY m.seqNo ASC
     </select>
 </mapper>

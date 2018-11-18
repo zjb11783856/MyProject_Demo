@@ -15,8 +15,8 @@ function navBar(strData) {
         if (data[i].children !== undefined && data[i].children.length > 0) {
             ulHtml += '<a href="javascript:;">';
             if (data[i].icon !== undefined && data[i].icon != '' && data[i].icon != null) {
-                if (data[i].icon.indexOf("icon-") !== -1) {
-                    ulHtml += '<i class="iconfont ' + data[i].icon + '" style="font-size: 20px" data-icon="' + data[i].icon + '"></i>';
+                if (data[i].icon != null && data[i].icon.indexOf("icon-") !== -1) {
+                    ulHtml += '<i class="' + data[i].icon + '" style="font-size: 20px" data-icon="' + data[i].icon + '"></i>';
                 } else {
                     ulHtml += '<i class="layui-icon" style="font-size: 20px" data-icon="' + data[i].icon + '">' + data[i].icon + '</i>';
                 }
@@ -31,9 +31,9 @@ function navBar(strData) {
                 } else {
                     ulHtml += '<dd><a href="javascript:;" style="font-size: 20px" data-url="' + data[i].children[j].href + '">';
                 }
-                if (data[i].children[j].icon !== undefined && data[i].children[j].icon !== '' && data[i].icon != null) {
+                if (data[i].children[j].icon !== undefined && data[i].children[j].icon !== '' && data[i].children[j].icon != null) {
                     if (data[i].children[j].icon.indexOf("icon-") !== -1) {
-                        ulHtml += '<i class="iconfont ' + data[i].children[j].icon + '" style="font-size: 20px" data-icon="' + data[i].children[j].icon + '"></i>';
+                        ulHtml += '<i class="' + data[i].children[j].icon + '" style="font-size: 20px" data-icon="' + data[i].children[j].icon + '"></i>';
                     } else {
                         ulHtml += '<i class="layui-icon" style="font-size: 20px" data-icon="' + data[i].children[j].icon + '">' + data[i].children[j].icon + '</i>';
                     }
@@ -48,8 +48,8 @@ function navBar(strData) {
                 ulHtml += '<a href="javascript:;" data-url="' + data[i].href + '">';
             }
             if (data[i].icon !== undefined && data[i].icon !== '' && data[i].icon != null) {
-                if (data[i].icon.indexOf("icon-") !== -1) {
-                    ulHtml += '<i class="iconfont ' + data[i].icon + '" style="font-size: 20px" data-icon="' + data[i].icon + '"></i>';
+                if (data[i].icon != null && data[i].icon.indexOf("icon-") !== -1) {
+                    ulHtml += '<i class="' + data[i].icon + '" style="font-size: 20px" data-icon="' + data[i].icon + '"></i>';
                 } else {
                     ulHtml += '<i class="layui-icon" style="font-size: 20px" data-icon="' + data[i].icon + '">' + data[i].icon + '</i>';
                 }

@@ -12,7 +12,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
     <link rel="stylesheet" href="${base}/static/layui/css/layui.css" media="all"/>
-    <link rel="stylesheet" href="//at.alicdn.com/t/font_tnyc012u2rlwstt9.css" media="all"/>
+    <link rel="stylesheet" href="${base}/static/css/weather.css" media="all"/>
     <link rel="stylesheet" href="${base}/static/css/main.css" media="all"/>
 </head>
 <body class="main_body">
@@ -57,7 +57,7 @@
                     } else {
                         T.addEventListener("load", g, false)
                     }
-                }(window, document, "script", "tpwidget", "//widget.seniverse.com/widget/chameleon.js"))</script>
+                }(window, document, "script", "tpwidget", "${base}/static/js/weather.js"))</script>
                 <script>tpwidget("init", {
                     "flavor": "slim",
                     "location": "WX4FBXXFKE4F",
